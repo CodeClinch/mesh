@@ -42,8 +42,9 @@ EOF
 kubectl get svc istio-ingressgateway -n istio-system
 curl -s -I -HHost:httpbin.example.com "a217815781811403a8ae1dbb341d42e5-707072058.eu-central-1.elb.amazonaws.com/status/200"
 
-kubectl exec --context=shoot--sectest--east2 sleep-64764b4c5c-vdtd7 -n client -c sleep -it sh
+kubectl get pods -n client --context=east 
+kubectl exec --context=east sleep-549f586f74-9srt4 -n client -c sleep -it sh
 
 curl -sI httpbin.server.global:8000/headers
 
--- curl -sI httpbin.${DEMO_SERVER_NAMESPACE}.global:8000/headers
+kubectl --context west -n server logs -l app=httpbin -c istio-proxy --tail=1

@@ -11,7 +11,17 @@ schemes:
   # tip: remove http to make production-grade
   - http
   - https
-# format of bodies a client can send (Content-Type)
+
+securityDefinitions:
+  Bearer:
+    type: apiKey
+    name: Authorization
+    in: header
+    description: |
+     For accessing the API a valid JWT token must be passed in all the queries in
+     the 'Authorization' header.
+
+  # format of bodies a client can send (Content-Type)
 consumes:
   - application/json
 # format of the responses to the client (Accepts)
@@ -42,8 +52,77 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
+
+  /ping:
+    # binds a127 app logic to a route
+    x-swagger-router-controller: ping
+    get:
+      description: ping
+      # used as the method name of the controller
+      operationId: ping
+      responses:
+        "200":
+          description: Success
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/PingResponse"
+        # responses may fall through to errors
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+
+  /remoteping:
+    # binds a127 app logic to a route
+    x-swagger-router-controller: remoteping
+    get:
+      description: remoteping
+      # used as the method name of the controller
+      operationId: remoteping
+      responses:
+        "200":
+          description: Success
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/RemotePingResponse"
+        # responses may fall through to errors
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"            
+
+  /secure/ping:
+    # https://swagger.io/docs/specification/authentication/openid-connect-discovery/
+    # binds a127 app logic to a route
+    x-swagger-router-controller: ping
+    get:
+      description: ping
+      # used as the method name of the controller
+      operationId: secureping
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - user
+      responses:
+        "200":
+          description: Success
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/PingResponse"
+        # responses may fall through to errors
+        "403":
+          description: "Access Denied"
+          schema:
+            $ref: "#/definitions/ErrorResponse"        
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+
   /swagger:
     x-swagger-pipe: swagger_raw
+
+
 # complex objects have schema definitions
 definitions:
   HealthcheckResponse:
@@ -52,6 +131,32 @@ definitions:
     properties:
       message:
         type: string
+  PingResponse:
+    type: array
+    items:
+      $ref: "#/definitions/PingResponseItem"
+  PingResponseItem:
+    type: object
+    properties:
+      time: 
+        type: string
+      message: 
+        type: string
+      requestHeaders:
+        type: object 
+  RemotePingResponse:
+    type: array
+    items:
+      $ref: "#/definitions/RemotePingResponseItem"
+  RemotePingResponseItem:
+    type: object
+    properties:
+      time: 
+        type: string
+      message: 
+        type: string
+      remoteResponse:
+        $ref: "#/definitions/PingResponseItem"
   ErrorResponse:
     required:
       - message
