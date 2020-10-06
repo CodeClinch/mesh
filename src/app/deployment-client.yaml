@@ -1,0 +1,77 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: demomesh
+  namespace: client
+  labels:
+    app: demomesh
+    service: demomesh
+spec:
+  ports:
+  - port: 10010
+  selector:
+    app: demomesh
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demomesh
+  namespace: client
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: demomesh
+  template:
+    metadata:
+      labels:
+        app: demomesh
+    spec:
+      containers:
+      - name: demomesh
+        image: codeclinch/mesh:latest
+        env:
+        - name: REMOTEPINGURL
+          value: "demomesh.server.global"
+        - name: REMOTEPINGPREFIX
+          value: "demo/"
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: demomesh-gateway
+  namespace: client
+spec:
+  selector:
+    istio: ingressgateway # use Istio default gateway implementation
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "*"
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: demomesh
+  namespace: client
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - demomesh-gateway
+  http:
+  - match:
+    - uri:
+        prefix: "/demo/"
+    - uri:
+        prefix: "/demo"
+    rewrite:
+      uri: "/"
+    route:
+    - destination:
+        port:
+          number: 10010
+        host: demomesh

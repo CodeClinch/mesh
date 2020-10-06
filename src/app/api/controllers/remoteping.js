@@ -43,7 +43,10 @@ var pings = [];
 async function remoteping(req, res) {
   // variables defined in the Swagger document can be referenced using req.swagger.params.{parameter_name}
   let server = process.env.REMOTEPINGURL || "localhost";
-  let r = await axios.get(`http://${server}:10010/ping`);
+  let perfix = process.env.REMOTEPINGPREFIX || "";
+  let url = `http://${server}:10010/${perfix}ping`;
+  console.log(`Client calls server: ${url}`);
+  let r = await axios.get(url);
   let current = r.data[r.data.length-1];
   debugger
   pings.push( {
