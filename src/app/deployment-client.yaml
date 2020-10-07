@@ -34,7 +34,7 @@ spec:
         - name: REMOTEPINGURL
           value: "demomesh.server.global"
         - name: REMOTEPINGPREFIX
-          value: "demo/"
+          value: ""
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: Gateway
@@ -75,3 +75,36 @@ spec:
         port:
           number: 10010
         host: demomesh
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: ServiceEntry
+metadata:
+    name: demomesh-west
+    namespace: client
+spec:
+    hosts:
+    # This must be of form name.namespace.global
+    - demomesh.server.global
+    # Treat remote cluster services as part of the service mesh
+    # as all clusters in the service mesh share the same root of trust.
+    location: MESH_INTERNAL
+    ports:
+    - name: http1
+      number: 10010
+      protocol: http
+    resolution: DNS
+    addresses:
+    # The IP address to which httpbin.${DEMO_SERVER_NAMESPACE}.global will resolve to
+    # must be unique for each remote service, within a given cluster.
+    # This address need not be routable. Traffic for this IP will be captured
+    # by the sidecar and routed appropriately.
+    - 240.0.0.2
+    endpoints:
+    # This is the routable address of the ingress gateway in cluster2 that
+    # sits in front of sleep.client service. Traffic from the sidecar will be
+    # routed to this address.
+    - address: ae7bc7f57a8894729bf1cdc289026df6-911806018.eu-central-1.elb.amazonaws.com
+      ports:
+        http1: 15443 # Do not change this port value  
+
+    

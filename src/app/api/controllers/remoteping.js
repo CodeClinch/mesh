@@ -44,17 +44,24 @@ async function remoteping(req, res) {
   // variables defined in the Swagger document can be referenced using req.swagger.params.{parameter_name}
   let server = process.env.REMOTEPINGURL || "localhost";
   let perfix = process.env.REMOTEPINGPREFIX || "";
-  let url = `http://${server}:10010/${perfix}ping`;
-  console.log(`Client calls server: ${url}`);
-  let r = await axios.get(url);
-  let current = r.data[r.data.length-1];
-  debugger
-  pings.push( {
-    time: moment().format("hh:mm:ss:ms"),
-    message: `remoteping ${pings.length+1}`,
-    remoteResponse : current
-  } );
+  try{
+    debugger
+    let url = `http://${server}:10010/${perfix}ping`;
+    console.log(`Client calls server: ${url}`);
+    let r = await axios.get(url);
+    let current = r.data[r.data.length-1];
+    debugger
+    pings.push( {
+      time: moment().format("hh:mm:ss:ms"),
+      message: `remoteping ${pings.length+1}`,
+      remoteResponse : current
+    } );
+    console.log(`Remote ${url} successfully called`);
+    // this sends back a JSON response which is a single string
+    res.json(pings);
+  }catch(err){
+    console.error(JSON.stringify(err));
+    res.status(500).send('Remote service could not be called');
+  }
 
-  // this sends back a JSON response which is a single string
-  res.json(pings);
 }
