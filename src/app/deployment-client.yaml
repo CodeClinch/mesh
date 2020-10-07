@@ -51,6 +51,15 @@ spec:
       protocol: HTTP
     hosts:
     - "*"
+  - port:
+      number: 443
+      name: https
+      protocol: HTTPS
+    tls:
+      mode: SIMPLE
+      credentialName: demomesh-credential # must be the same as secret
+    hosts:
+    - "*"
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
@@ -83,10 +92,7 @@ metadata:
     namespace: client
 spec:
     hosts:
-    # This must be of form name.namespace.global
     - demomesh.server.global
-    # Treat remote cluster services as part of the service mesh
-    # as all clusters in the service mesh share the same root of trust.
     location: MESH_INTERNAL
     ports:
     - name: http1
@@ -94,17 +100,8 @@ spec:
       protocol: http
     resolution: DNS
     addresses:
-    # The IP address to which httpbin.${DEMO_SERVER_NAMESPACE}.global will resolve to
-    # must be unique for each remote service, within a given cluster.
-    # This address need not be routable. Traffic for this IP will be captured
-    # by the sidecar and routed appropriately.
     - 240.0.0.2
     endpoints:
-    # This is the routable address of the ingress gateway in cluster2 that
-    # sits in front of sleep.client service. Traffic from the sidecar will be
-    # routed to this address.
-    - address: ae7bc7f57a8894729bf1cdc289026df6-911806018.eu-central-1.elb.amazonaws.com
+    - address: a3ab20d6ca93943389373a9b262d6c42-1024257876.eu-central-1.elb.amazonaws.com
       ports:
         http1: 15443 # Do not change this port value  
-
-    

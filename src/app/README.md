@@ -22,3 +22,21 @@ curl -s -I -H "Host:demomesh.example.com" "http://demomesh:10010/healthcheck"
 
 
 curl -H "Host:demomesh.example.com" "http://demomesh:10010/ping"  
+
+
+## Certs
+https://istio.io/latest/docs/tasks/traffic-management/ingress/secure-ingress/
+
+
+openssl req -x509 -sha256 -nodes -days 365 -newkey rsa:2048 -subj '/O=example Inc./CN=example.com' -keyout example.com.key -out example.com.crt
+
+openssl req -out demomesh.example.com.csr -newkey rsa:2048 -nodes -keyout demomesh.example.com.key -subj "/CN=demomesh.example.com/O=demomesh organization"
+
+openssl x509 -req -days 365 -CA example.com.crt -CAkey example.com.key -set_serial 0 -in demomesh.example.com.csr -out demomesh.example.com.crt
+
+kubectl create -n istio-system secret tls demomesh-credential --key=demomesh.example.com.key --cert=demomesh.example.com.crt --context east
+
+
+## Next step 
+https://istio.io/latest/blog/2019/app-identity-and-access-adapter/
+https://medium.com/@suman_ganta/openid-authentication-with-istio-a32838adb492
