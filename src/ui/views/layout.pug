@@ -1,0 +1,19 @@
+doctype html
+html
+  head
+    title= title
+    link(rel='stylesheet', href='/stylesheets/style.css')
+
+    link(rel='stylesheet', href='/fontawesome/web-fonts-with-css/css/fontawesome.min.css')
+    link(rel='stylesheet', href='/fontawesome/web-fonts-with-css/css/fa-brands.css')
+    link(rel='stylesheet', href='/fontawesome/web-fonts-with-css/css/fa-regular.css')
+    link(rel='stylesheet', href='/fontawesome/web-fonts-with-css/css/fa-solid.css')
+    link(rel='stylesheet', href='/bootstrap-4.0.0-dist/css/bootstrap.min.css')
+
+  body(style="width: 1000px;")
+    block content
+  
+  script(src='/javascripts/jquery-3.3.1.min.js')
+  script
+    include ../public/javascripts/util.js
+

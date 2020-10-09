@@ -26,7 +26,8 @@ const moment = require("moment");
   we specify that in the exports of this module that 'hello' maps to the function named 'hello'
  */
 module.exports = {
-  ping: ping
+  ping: ping, 
+  secureping : ping
 };
 
 /*
@@ -40,7 +41,6 @@ var pings = [];
 
 function ping(req, res) {
   // variables defined in the Swagger document can be referenced using req.swagger.params.{parameter_name}
-  debugger
   pings.push( {
     time: moment().format("hh:mm:ss:ms"),
     message: `ping ${pings.length+1}`,

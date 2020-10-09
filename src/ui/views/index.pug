@@ -1,0 +1,133 @@
+extends layout
+
+block content
+  h1 Mesh Test
+
+  h2 Overview
+  div.mb-3.clearfix
+    button.mr-2.btn.btn-outline-secondary.showbtn1.float-left(type='button' onClick="switchVisibility('#setup-down', '#setup-up');switchVisibility('#setup', '#setup-dummy')")
+      i( id="setup-down" class="fas fa-angle-double-down " + (query.action == "setup" ? "d-none" : "") title="minimieren" )
+      i( id="setup-up" class="fas fa-angle-double-up " + (query.action == "setup" ? "" : "d-none") title="maximieren" )
+    a(href="/") 
+      button.mr-2.btn.btn-outline-secondary.showbtn1.float-left
+        i(class="fas fa-home")
+
+  div#setup(class=(query.action == "setup" ? "" : "d-none"))
+    h5 Mesh Setup
+    p This demo will show how multiple clusters can be connected and how service calls can be restricted to a defined scope. For this example Istio is used. 
+    div.mb-3.clearfix
+      img.mr-1(src="/images/Overview-CA.png")
+    h5 References
+    div.mb-3.clearfix
+      div
+        a(href="https://dashboard.garden.canary.k8s.ondemand.com/login") Gardener to create clusters
+      div
+        a(href="https://github.wdf.sap.corp/CPSecurity/Knowledge-Base/tree/master/80_Kubernetes") Guide and scripts to setup the mesh
+  span#serverpol-dummy(class=(query.action == "serverpol" ? "" : "d-none"))
+
+  h3 Actions
+  h4 Call Local Service - mTLS Certificate Test
+  div.mb-3.clearfix
+    button.mr-2.btn.btn-outline-secondary.showbtn1.float-left(type='button' onClick="switchVisibility('#cert-down', '#cert-up');switchVisibility('#cert', '#cert-dummy')")
+      i( id="cert-down" class="fas fa-angle-double-down " + (query.action == "cert" ? "d-none" : "") title="minimieren" )
+      i( id="cert-up" class="fas fa-angle-double-up " + (query.action == "cert" ? "" : "d-none") title="maximieren" )
+    a(href="?dest=ping&demomeshhost=demomesh.client&action=cert") 
+      button.mr-2.btn.btn-outline-secondary.showbtn1.float-left
+        i(class="fas fa-play")
+  ul
+    li UI container calls client container in different namespace
+    li Without a certificate in place the call will be rejected
+    li Client namespace is mTLS enabled, UI namespace is not mTLS enabled
+
+  div#cert(class=(query.action == "cert" ? "" : "d-none"))
+    if message && query.action == "cert"
+      h5 Response
+      div(class=(message.status != 200 ? "alert alert-danger" : "alert alert-success")  )
+        p.mb-1.mr-1="Status: " + message.status
+        p.mb-1.mr-1="Text: " + message.text
+        p.mr-1="Target: " + message.target
+  
+    if message && query.action == "cert" && message.status != 200  
+      h5 Fix
+      div.mb-3.ml-3
+        div
+          code.mb-1.mr-1 kubectl --context=east label --overwrite namespace ui istio-injection=enabled
+        div
+          code.mb-1.mr-1 kubectl rollout restart deployment demoui --context east -n ui
+        div
+          code.mb-1.mr-1 kubectl get pods -n ui --context east
+
+    h5 Szenario
+    if message && message.status != 200
+      img.mr-1(src="/images/Szenario-UI-Client-Without-Cert.png")
+    else
+      img.mr-1(src="/images/Szenario-UI-Client.png")
+  span#cert-dummy(class=(query.action == "cert" ? "" : "d-none"))
+
+  h4 Call Remote Service - mTLS Kubernetes Policy Check  
+  div.mb-3.clearfix
+    button.mr-2.btn.btn-outline-secondary.showbtn1.float-left(type='button' onClick="switchVisibility('#policy-down', '#policy-up');switchVisibility('#policy', '#policy-dummy')")
+      i( id="policy-down" class="fas fa-angle-double-down " + (query.action == "policy" ? "d-none" : "") title="minimieren" )
+      i( id="policy-up" class="fas fa-angle-double-up " + (query.action == "policy" ? "" : "d-none") title="maximieren" )
+    a(href="?dest=ping&demomeshhost=demomesh.server.global&action=policy") 
+      button.mr-2.btn.btn-outline-secondary.showbtn1.float-left
+        i(class="fas fa-play")
+  ul
+    li UI container calls server container in different namespace and on different Kubernetes cluster
+    li Without a policy enablement the call will be rejected
+
+  div#policy(class=(query.action == "policy" ? "" : "d-none"))    
+    if message && query.action == "policy"
+      h5 Response
+      div(class=(message.status != 200 ? "alert alert-danger" : "alert alert-success")  )
+        p.mb-1.mr-1="Status: " + message.status
+        p.mb-1.mr-1="Text: " + message.text
+        p.mr-1="Target: " + message.target
+
+    if message && query.action == "policy" && message.status != 200
+      h5 Fix
+      div.mb-3.ml-3
+        div
+          code.mb-1.mr-1 kubectl apply -f AuthZPolicyAllowUI.yaml -n server --context west
+        div
+          code.mb-1.mr-1 kubectl get AuthorizationPolicy -n server --context west
+
+    h5 Szenario
+    if message && message.status != 200
+      img.mr-1(src="/images/Szenario-UI-Server-Err-Policy.png")
+    else
+      img.mr-1(src="/images/Szenario-UI-Server.png")
+  span#policy-dummy(class=(query.action == "policy" ? "" : "d-none"))
+
+  h4 Call Remote Service - OPA Authentication   
+  div.mb-3.clearfix
+    button.mr-2.btn.btn-outline-secondary.showbtn1.float-left(type='button' onClick="switchVisibility('#serverpol-down', '#serverpol-up');switchVisibility('#serverpol', '#serverpol-dummy')")
+      i( id="serverpol-down" class="fas fa-angle-double-down " + (query.action == "serverpol" ? "d-none" : "") title="minimieren" )
+      i( id="serverpol-up" class="fas fa-angle-double-up " + (query.action == "serverpol" ? "" : "d-none") title="maximieren" )
+    a(href="?dest=secure/ping&demomeshhost=demomesh.server.global&action=serverpol") 
+      button.mr-2.btn.btn-outline-secondary.showbtn1.float-left
+        i(class="fas fa-play")
+  ul
+    li UI container calls server container through client pod
+    li Client pod is allowed to call server pod (policy)
+    li OPA policy checks if user is allwoed to execute data and filters results
+  
+  div#serverpol(class=(query.action == "serverpol" ? "" : "d-none"))
+    if message & query.action == "serverpol"
+      h5 Response
+      div(class=(message.status != 200 ? "alert alert-danger" : "alert alert-success")  )
+        p.mb-1.mr-1="Status: " + message.status
+        p.mb-1.mr-1="Text: " + message.text
+        p.mr-1="Target: " + message.target
+    if message && query.action == "serverpol" && message.status != 200
+      h5 Fix
+      div.mb-3.ml-3
+        code.mb-1.mr-1 Assign role to user
+  
+    h5 Szenario
+    if message && message.status != 200
+      img.mr-1(src="/images/Szenario-UI-Server-Opa-Err.png")
+    else
+      img.mr-1(src="/images/Szenario-UI-Server-Opa.png")
+  span#serverpol-dummy(class=(query.action == "serverpol" ? "" : "d-none"))
+

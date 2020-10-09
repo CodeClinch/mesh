@@ -1,0 +1,364 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <name>firstapp - Application</name>
+    <description>firstapp - Application</description>
+
+    <groupId>firstapp</groupId>
+    <artifactId>firstapp-application</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>war</packaging>
+
+    <parent>
+        <groupId>firstapp</groupId>
+        <artifactId>firstapp</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+
+    <properties>
+        <cas.dcl.version>1.0.0-SNAPSHOT</cas.dcl.version>
+    </properties>
+
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>25.1-jre</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.checkerframework</groupId>
+                        <artifactId>checker-qual</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.sap.cloud.sdk.cloudplatform</groupId>
+            <artifactId>scp-cf</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.sap.cloud.sdk.s4hana</groupId>
+            <artifactId>s4hana-all</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+            <version>1.2</version>
+        </dependency>
+
+
+        <dependency>
+            <groupId>javax.inject</groupId>
+            <artifactId>javax.inject</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <!--dependency>
+            <groupId>com.sap.cloud</groupId>
+            <artifactId>neo-javaee7-wp-api</artifactId>
+            <scope>provided</scope>
+        </dependency-->
+    </dependencies>
+
+    <build>
+        <finalName>${project.artifactId}</finalName>
+
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-war-plugin</artifactId>
+                    <version>3.2.2</version>
+                    <configuration>
+                        <attachClasses>true</attachClasses>
+                        <archive>
+                            <manifestEntries>
+                                <Version>${project.version}</Version>
+                                <Import-Package>${scp.warImportPackage}</Import-Package>
+                            </manifestEntries>
+                        </archive>
+                        <webResources>
+                            <resources>
+                                <filtering>true</filtering>
+                                <directory>src/main/webapp</directory>
+                                <includes>
+                                    <include>**/web.xml</include>
+                                </includes>
+                            </resources>
+                        </webResources>
+                    </configuration>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-dependency-plugin</artifactId>
+                    <version>3.1.1</version>
+                    <configuration>
+                        <artifactItems>
+                            <artifactItem>
+                                <groupId>com.sap.cloud</groupId>
+                                <artifactId>neo-javaee7-wp-sdk</artifactId>
+                                <version>${scp.sdkVersion}</version>
+                                <type>zip</type>
+                                <overWrite>false</overWrite>
+                                <outputDirectory>${scp.sdkInstallPath}</outputDirectory>
+                            </artifactItem>
+                        </artifactItems>
+                    </configuration>
+                </plugin>
+
+                <!-- Plugin for deployment to SAP Cloud Platform Neo. -->
+                <plugin>
+                    <groupId>com.sap.cloud</groupId>
+                    <artifactId>neo-javaee7-wp-maven-plugin</artifactId>
+                    <version>${scp.sdkVersion}</version>
+                    <executions>
+                        <execution>
+                            <id>stop</id>
+                            <phase>install</phase>
+                            <goals>
+                                <goal>stop</goal>
+                            </goals>
+                            <configuration>
+                                <skip>${scp.skipRestart}</skip>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>deploy</id>
+                            <phase>install</phase>
+                            <goals>
+                                <goal>deploy</goal>
+                            </goals>
+                            <configuration>
+                                <skip>${scp.skipDeploy}</skip>
+                                <vmArguments>${scp.vmArguments}</vmArguments>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>start</id>
+                            <phase>install</phase>
+                            <goals>
+                                <goal>start</goal>
+                            </goals>
+                            <configuration>
+                                <skip>${scp.skipRestart}</skip>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>rolling-update</id>
+                            <phase>install</phase>
+                            <goals>
+                                <goal>rolling-update</goal>
+                            </goals>
+                            <configuration>
+                                <skip>${scp.skipRollingUpdate}</skip>
+                            </configuration>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <sdkInstallPath>${scp.sdkInstallPath}</sdkInstallPath>
+                        <skip>${scp.skipInstallSdk}</skip>
+
+                        <application>${scp.app}</application>
+                        <source>${project.build.directory}/${project.build.finalName}.war</source>
+
+                        <vmArguments>${scp.vmArguments}</vmArguments>
+                        <size>${scp.vmSize}</size>
+                        <minimumProcesses>${scp.vmMinProcesses}</minimumProcesses>
+                        <maximumProcesses>${scp.vmMaxProcesses}</maximumProcesses>
+
+                        <host>${scp.host}</host>
+                        <account>${scp.account}</account>
+                        <user>${scp.username}</user>
+                        <password>${scp.password}</password>
+                        <synchronous>true</synchronous>
+
+                        <httpProxyHost>${proxy.host}</httpProxyHost>
+                        <httpProxyPort>${proxy.port}</httpProxyPort>
+                        <httpsProxyHost>${proxy.host}</httpsProxyHost>
+                        <httpsProxyPort>${proxy.port}</httpsProxyPort>
+
+                        <consoleCommand />
+                        <consoleHttpProxyHost>${proxy.host}</consoleHttpProxyHost>
+                        <consoleHttpProxyPort>${proxy.port}</consoleHttpProxyPort>
+                        <consoleHttpsProxyHost>${proxy.host}</consoleHttpsProxyHost>
+                        <consoleHttpsProxyPort>${proxy.port}</consoleHttpsProxyPort>
+
+                        <dbsystem />
+                        <dbSize />
+                        <dbUser />
+                    </configuration>
+                </plugin>
+
+                <!-- Plugin for deployment to local runtime of SAP Cloud Platform Neo. -->
+                <plugin>
+                    <groupId>com.sap.cloud.sdk.plugins</groupId>
+                    <artifactId>scp-neo-maven-plugin</artifactId>
+                    <version>3.15.1-M1</version>
+                    <configuration>
+                        <sdkPlugin>neo-javaee7-wp-maven-plugin</sdkPlugin>
+                        <sdkPluginVersion>${scp.sdkVersion}</sdkPluginVersion>
+                        <sdkInstallPath>${scp.sdkInstallPath}</sdkInstallPath>
+                        <sdkSymbolicLink>${scp.sdkSymbolicLink}</sdkSymbolicLink>
+                        <sdkServerContentPath>${scp.sdkLocalServerContentPath}</sdkServerContentPath>
+                        <source>${project.build.directory}/${project.build.finalName}.war</source>
+                        <proxyHost>${proxy.host}</proxyHost>
+                        <proxyPort>${proxy.port}</proxyPort>
+                        <httpNonProxyHosts>${non.proxy.hosts}</httpNonProxyHosts>
+                        <destinations>
+                            <destination>
+                                <path>${scp.sdkErpEndpoint}</path>
+                                <username>${erp.username}</username>
+                                <password>${erp.password}</password>
+                                <url>${erp.url}</url>
+                            </destination>
+                        </destinations>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+
+        <plugins>
+            <plugin>
+                <groupId>com.sap.cloud.sdk.plugins</groupId>
+                <artifactId>usage-analytics-maven-plugin</artifactId>
+                <version>3.15.1-M1</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>usage-analytics</goal>
+                        </goals>
+                        <configuration>
+                            <skipUsageAnalytics>false</skipUsageAnalytics>
+                            <generateSalt>true</generateSalt>
+                            <!--
+                            Note: A random salt is auto-generated once the project is built for the first time.
+                            Please keep the generated salt in the POM file, for example, when pushing to git.
+
+                            To learn more, visit: https://blogs.sap.com/2018/10/23/usage-analytics-s4sdk/
+                            -->
+                            <salt>247c9fd1d0328fd3a9886f4beb3eac3a331e8914f18ff88be42d885defa34c45</salt>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>com.sap.cloud.security.cas.dcl</groupId>
+                <artifactId>dcl-webxml-plugin</artifactId>
+                <version>${cas.dcl.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>webxml2dcl</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <!-- This can be removed when *.DCL files are compiled on the server -->
+                <groupId>com.sap.cloud.security.cas.dcl</groupId>
+                <artifactId>dcl-compiler-plugin</artifactId>
+                <version>${cas.dcl.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                        <configuration>
+                            <!-- Normally dcl files are expected in /src/main/resources, -->
+                            <!-- but the dcl-webxml-plugin already puts them to /target/classes -->
+                            <!-- because the web.dcl is only transitive (generated from web.xml) -->
+                            <sourceDirectory>${project.build.outputDirectory}</sourceDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <!--
+        Profiles that are used to set the Neo SDK "neo" command extension ("neo.sh" or "neo.cmd")
+        -->
+        <profile>
+            <id>windows</id>
+            <activation>
+                <os>
+                    <family>windows</family>
+                </os>
+            </activation>
+            <properties>
+                <scp.sdkNeoCmdExtension>.bat</scp.sdkNeoCmdExtension>
+            </properties>
+        </profile>
+        <profile>
+            <id>unix</id>
+            <activation>
+                <os>
+                    <family>unix</family>
+                </os>
+            </activation>
+            <properties>
+                <scp.sdkNeoCmdExtension>.sh</scp.sdkNeoCmdExtension>
+            </properties>
+        </profile>
+
+        <!-- Profile setting properties for deploying to the local SAP CP runtime. -->
+        <profile>
+            <id>local-deploy</id>
+            <activation>
+                <property>
+                    <name>!scp.app</name>
+                </property>
+            </activation>
+            <properties>
+                <scp.skipInstallSdk>true</scp.skipInstallSdk>
+                <scp.skipDeploy>true</scp.skipDeploy>
+                <scp.skipPutDestination>true</scp.skipPutDestination>
+                <scp.skipRestart>true</scp.skipRestart>
+                <scp.skipRollingUpdate>true</scp.skipRollingUpdate>
+            </properties>
+        </profile>
+
+        <!-- Profile setting properties for deploying a productive version to SAP CP. -->
+        <profile>
+            <id>scp-deploy</id>
+            <activation>
+                <property>
+                    <name>productive</name>
+                </property>
+            </activation>
+            <properties>
+                <scp.skipInstallSdk>false</scp.skipInstallSdk>
+                <scp.skipDeploy>true</scp.skipDeploy>
+                <scp.skipPutDestination>false</scp.skipPutDestination>
+                <scp.skipRestart>true</scp.skipRestart>
+                <scp.skipRollingUpdate>false</scp.skipRollingUpdate>
+            </properties>
+        </profile>
+    </profiles>
+</project>

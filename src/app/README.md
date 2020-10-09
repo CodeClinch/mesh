@@ -8,6 +8,20 @@ docker run -d -p 10010:10010 codeclinch/app:latest
 docker login -u <usr> -p <pwd>
 docker push codeclinch/mesh:latest
 ``` 
+## Create and publish docker image 
+```
+docker build -t codeclinch/ui .
+docker run -d -p 3000:3000 codeclinch/ui:latest 
+docker push codeclinch/ui:latest
+``` 
+
+## Cas docker
+``` 
+docker build -t codeclinch/opa .
+docker run -d -p 8181:8181 codeclinch/opa:latest 
+docker push codeclinch/opa:latest
+``` 
+
 ## Create Kubernetes deployment
 kubectl apply -f deployment.yaml --context east
 kubectl get service -n istio-system --context east
@@ -40,3 +54,5 @@ kubectl create -n istio-system secret tls demomesh-credential --key=demomesh.exa
 ## Next step 
 https://istio.io/latest/blog/2019/app-identity-and-access-adapter/
 https://medium.com/@suman_ganta/openid-authentication-with-istio-a32838adb492
+
+

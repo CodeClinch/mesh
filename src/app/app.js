@@ -4,15 +4,16 @@ var SwaggerExpress = require('swagger-express-mw');
 var app = require('express')();
 const YAML = require('yamljs');
 const swaggerDocument = YAML.load('./api/swagger/swagger.yaml');
-
 const swaggerUI = require("swagger-ui-express");
-
-
+const auth = require('./api/helpers/auth.js');
 
 module.exports = app; // for testing
 
 var config = {
-  appRoot: __dirname // required config
+  appRoot: __dirname, // required config
+  swaggerSecurityHandlers : {
+    Bearer : auth.authZ
+  }
 };
 
 app.use("/api/docs", swaggerUI.serve, swaggerUI.setup(swaggerDocument));

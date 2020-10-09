@@ -1,0 +1,107 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: demomesh
+  namespace: client
+  labels:
+    app: demomesh
+    service: demomesh
+spec:
+  ports:
+  - port: 10010
+  selector:
+    app: demomesh
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demomesh
+  namespace: client
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: demomesh
+  template:
+    metadata:
+      labels:
+        app: demomesh
+    spec:
+      containers:
+      - name: demomesh
+        image: codeclinch/mesh:latest
+        env:
+        - name: REMOTEPINGURL
+          value: "demomesh.server.global"
+        - name: REMOTEPINGPREFIX
+          value: "secure/"
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: demomesh-gateway
+  namespace: client
+spec:
+  selector:
+    istio: ingressgateway # use Istio default gateway implementation
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "*"
+  - port:
+      number: 443
+      name: https
+      protocol: HTTPS
+    tls:
+      mode: SIMPLE
+      credentialName: demomesh-credential # must be the same as secret
+    hosts:
+    - "*"
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: demomesh
+  namespace: client
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - demomesh-gateway
+  http:
+  - match:
+    - uri:
+        prefix: "/demo/"
+    - uri:
+        prefix: "/demo"
+    rewrite:
+      uri: "/"
+    route:
+    - destination:
+        port:
+          number: 10010
+        host: demomesh
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: ServiceEntry
+metadata:
+    name: demomesh-west
+    namespace: client
+spec:
+    hosts:
+    - demomesh.server.global
+    location: MESH_INTERNAL
+    ports:
+    - name: http1
+      number: 10010
+      protocol: http
+    resolution: DNS
+    addresses:
+    - 240.0.0.2
+    endpoints:
+    - address: a3ab20d6ca93943389373a9b262d6c42-1024257876.eu-central-1.elb.amazonaws.com
+      ports:
+        http1: 15443 # Do not change this port value  

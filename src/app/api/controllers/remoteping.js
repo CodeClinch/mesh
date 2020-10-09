@@ -45,7 +45,6 @@ async function remoteping(req, res) {
   let server = process.env.REMOTEPINGURL || "localhost";
   let perfix = process.env.REMOTEPINGPREFIX || "";
   try{
-    debugger
     let url = `http://${server}:10010/${perfix}ping`;
     console.log(`Client calls server: ${url}`);
     let r = await axios.get(url);

@@ -1,0 +1,74 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: demoui
+  namespace: ui
+  labels:
+    app: demoui
+    service: demoui
+spec:
+  ports:
+  - port: 3000
+  selector:
+    app: demoui
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demoui
+  namespace: ui
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: demoui
+  template:
+    metadata:
+      labels:
+        app: demoui
+    spec:
+      containers:
+      - name: demoui
+        image: codeclinch/ui:latest
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: demoui-gateway
+  namespace: ui
+spec:
+  selector:
+    istio: ingressgateway # use Istio default gateway implementation
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "*"
+  - port:
+      number: 443
+      name: https
+      protocol: HTTPS
+    tls:
+      mode: SIMPLE
+      credentialName: demomesh-credential # must be the same as secret
+    hosts:
+    - "*"
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: demoui
+  namespace: ui
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - demoui-gateway
+  http:
+  - route:
+    - destination:
+        port:
+          number: 3000
+        host: demoui.ui.svc.cluster.local
