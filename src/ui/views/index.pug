@@ -113,7 +113,7 @@ block content
     li OPA policy checks if user is allwoed to execute data and filters results
   
   div#serverpol(class=(query.action == "serverpol" ? "" : "d-none"))
-    if message & query.action == "serverpol"
+    if message && query.action == "serverpol"
       h5 Response
       div(class=(message.status != 200 ? "alert alert-danger" : "alert alert-success")  )
         p.mb-1.mr-1="Status: " + message.status
@@ -122,7 +122,7 @@ block content
     if message && query.action == "serverpol" && message.status != 200
       h5 Fix
       div.mb-3.ml-3
-        code.mb-1.mr-1 Assign role to user
+        code.mb-1.mr-1 Assign policy to user
   
     h5 Szenario
     if message && message.status != 200
