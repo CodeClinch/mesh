@@ -45,7 +45,6 @@ block content
       div(class=(message.status != 200 ? "alert alert-danger" : "alert alert-success")  )
         p.mb-1.mr-1="Status: " + message.status
         p.mb-1.mr-1="Text: " + message.text
-        p.mr-1="Target: " + message.target
   
     if message && query.action == "cert" && message.status != 200  
       h5 Fix
@@ -82,7 +81,6 @@ block content
       div(class=(message.status != 200 ? "alert alert-danger" : "alert alert-success")  )
         p.mb-1.mr-1="Status: " + message.status
         p.mb-1.mr-1="Text: " + message.text
-        p.mr-1="Target: " + message.target
 
     if message && query.action == "policy" && message.status != 200
       h5 Fix
@@ -118,7 +116,6 @@ block content
       div(class=(message.status != 200 ? "alert alert-danger" : "alert alert-success")  )
         p.mb-1.mr-1="Status: " + message.status
         p.mb-1.mr-1="Text: " + message.text
-        p.mr-1="Target: " + message.target
     if message && query.action == "serverpol" && message.status != 200
       h5 Fix
       div.mb-3.ml-3

@@ -45,17 +45,26 @@ async function remoteping(req, res) {
   let server = process.env.REMOTEPINGURL || "localhost";
   let perfix = process.env.REMOTEPINGPREFIX || "";
   try{
-    let url = `http://${server}:10010/${perfix}ping`;
-    console.log(`Client calls server: ${url}`);
-    let r = await axios.get(url);
+
+    let payload = {
+      method: 'get',
+      url: `http://${server}:10010/${perfix}ping`,
+      headers: {
+        Authorization: req.headers.authorization
+      }
+    }
+    
+    console.log("--- Remoteping Call ---");
+    console.log(JSON.stringify(payload));
+
+    let r = await axios(payload);
     let current = r.data[r.data.length-1];
-    debugger
     pings.push( {
       time: moment().format("hh:mm:ss:ms"),
       message: `remoteping ${pings.length+1}`,
       remoteResponse : current
     } );
-    console.log(`Remote ${url} successfully called`);
+    console.log(`Remote ${payload.url} successfully called`);
     // this sends back a JSON response which is a single string
     res.json(pings);
   }catch(err){

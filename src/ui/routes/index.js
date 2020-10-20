@@ -12,9 +12,20 @@ async function callBackend(req, res, next){
   let url = "";
   try{
     if(req.query.dest && req.query.demomeshhost){
+      console.log(`--- Remote Call ---`);
+      console.log(`Request headers: ${JSON.stringify(req.headers)}`);
+      console.log(`--- End Headers ---`);
+      let config = {
+        headers: {}
+      }
+      if(req.headers.authorization){
+        config.headers.Authorization = req.headers.authorization
+      }
       url = `http://${req.query.demomeshhost}:10010/${req.query.dest}`;
       console.log(`UI calls server: ${url}`);
-      let r = await axios.get(url);
+      console.log(`Parameter for server call: ${JSON.stringify(config)}`);
+      let r = await axios.get(url, config);
+      console.log(`Success full call, response: ${r.status}, ${r.data}`);
       msg = {
         status : 200,
         text : "Success",

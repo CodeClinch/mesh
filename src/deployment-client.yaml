@@ -102,6 +102,6 @@ spec:
     addresses:
     - 240.0.0.2
     endpoints:
-    - address: a3ab20d6ca93943389373a9b262d6c42-1024257876.eu-central-1.elb.amazonaws.com
+    - address: a64dfd8370c6242f29db8ecad53f690a-1385962498.eu-central-1.elb.amazonaws.com
       ports:
         http1: 15443 # Do not change this port value  

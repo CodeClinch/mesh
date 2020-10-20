@@ -4,9 +4,11 @@
 ## Create and publish docker image 
 ```
 docker build -t codeclinch/mesh .
-docker run -d -p 10010:10010 codeclinch/app:latest 
+docker run -d -p 10010:10010 codeclinch/mesh:latest 
 docker login -u <usr> -p <pwd>
 docker push codeclinch/mesh:latest
+kubectl delete -f deployment-ui.yaml -n ui --context east
+kubectl apply -f deployment-ui.yaml -n ui --context east
 ``` 
 ## Create and publish docker image 
 ```
@@ -20,6 +22,10 @@ docker push codeclinch/ui:latest
 docker build -t codeclinch/opa .
 docker run -d -p 8181:8181 codeclinch/opa:latest 
 docker push codeclinch/opa:latest
+
+docker build -t codeclinch/opa2 .
+docker run -d -p 8181:8181 codeclinch/opa2:latest
+docker push codeclinch/opa2:latest
 ``` 
 
 ## Create Kubernetes deployment

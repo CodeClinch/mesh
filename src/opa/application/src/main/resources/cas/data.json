@@ -4,26 +4,10 @@
       "4b4804ef-9b3d-4772-bd47-8071c6f2a1b2": [
         "Everyone",
         "BusinessPartnerManager"
-      ]
-    },
-    "9d650c82-278d-4000-9590-df12cf77267c" : {
-      "4b4804ef-9b3d-4772-bd47-8071c6f2a1b2": [
-        "Everyone",
-        "BusinessPartnerManager"
-      ]
-    },
-    "52b3f392-d5b4-411e-accc-bf2794dabd1b" : {
-      "3b932ba9-e4f3-49de-a5dc-36a5ae7ae71b": [
-        "Everyone",
-        "BusinessPartnerManager"
       ],
-      "e57b4fef-65de-44e3-9679-bf04c9441d6e" : [
+      "e57b4fef-65de-44e3-9679-bf04c9441d6e": [
         "Everyone",
-        "BusinessPartnerManager"
-      ],
-      "15cf041e-5960-4101-ab05-99fa2cd06b72" : [
-        "Everyone",
-        "BusinessPartnerManager"
+        "Employee"
       ]
     }
   }
