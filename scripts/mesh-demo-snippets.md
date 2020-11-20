@@ -40,11 +40,14 @@ EOF
 
 ## call server directly
 kubectl get svc istio-ingressgateway -n istio-system
-curl -s -I -HHost:httpbin.example.com "a217815781811403a8ae1dbb341d42e5-707072058.eu-central-1.elb.amazonaws.com/status/200"
+curl -s -I -HHost:httpbin.example.com "ae7bc7f57a8894729bf1cdc289026df6-911806018.eu-central-1.elb.amazonaws.com/status/200"
 
 kubectl get pods -n client --context=east 
-kubectl exec --context=east sleep-549f586f74-9srt4 -n client -c sleep -it sh
+kubectl exec --context=east sleep-5588dcbb8d-4qqz9 -n client -c sleep -it sh
 
-curl -sI httpbin.server.global:8000/headers
+curl -I "http://httpbin.server.global:8000/headers"
 
 kubectl --context west -n server logs -l app=httpbin -c istio-proxy --tail=1
+
+## Get url from server 
+kubectl --context=west get svc --selector=app=istio-ingressgateway -n istio-system -o jsonpath='{.items..status.loadBalancer.ingress..hostname}')
