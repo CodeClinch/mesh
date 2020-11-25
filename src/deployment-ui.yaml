@@ -41,12 +41,6 @@ spec:
     istio: ingressgateway # use Istio default gateway implementation
   servers:
   - port:
-      number: 80
-      name: http
-      protocol: HTTP
-    hosts:
-    - "*"
-  - port:
       number: 443
       name: https
       protocol: HTTPS
@@ -54,7 +48,7 @@ spec:
       mode: SIMPLE
       credentialName: demomesh-credential # must be the same as secret
     hosts:
-    - "*"
+    - "*.eu-central-1.elb.amazonaws.com"
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
@@ -63,11 +57,15 @@ metadata:
   namespace: ui
 spec:
   hosts:
-  - "*"
+  - "*.eu-central-1.elb.amazonaws.com"
   gateways:
   - demoui-gateway
   http:
-  - route:
+  - name: "demoui-gateway"
+    match:
+    - uri:
+        prefix: /    
+    route:
     - destination:
         port:
           number: 3000

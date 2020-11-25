@@ -3,6 +3,7 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+const log = require("./log.js");
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -21,8 +22,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // log headers
 app.use(function(req, res, next) {
-  console.log("--headers--");
-  console.log(JSON.stringify(req.headers));
+  log.info("----- New request ------");
+  log.info(`Request headers: ${JSON.stringify(req.headers)}`);
   next();
 });
 

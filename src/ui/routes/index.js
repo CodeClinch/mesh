@@ -1,6 +1,18 @@
 var express = require('express');
 var router = express.Router();
 const axios = require('axios');
+const log = require("../log.js");
+const atob = require('atob');
+
+function parseJwt (token) {
+  var base64Url = token.split('.')[1];
+  var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+  var jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+  }).join(''));
+
+  return JSON.parse(jsonPayload);
+};
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -12,35 +24,41 @@ async function callBackend(req, res, next){
   let url = "";
   try{
     if(req.query.dest && req.query.demomeshhost){
-      console.log(`--- Remote Call ---`);
-      console.log(`Request headers: ${JSON.stringify(req.headers)}`);
-      console.log(`--- End Headers ---`);
+      url = `http://${req.query.demomeshhost}:10010/${req.query.dest}`;
+      log.info(`Call remote server. Target: ${url}`);
       let config = {
         headers: {}
       }
+
       if(req.headers.authorization){
         config.headers.Authorization = req.headers.authorization
+        let jwt = parseJwt(req.headers.authorization);
+        log.info(`- With JWT forwarding: ${JSON.stringify(jwt)}`)
+      }else{
+        log.info("- Without JWT forwarding: no authentication headers provided")
       }
-      url = `http://${req.query.demomeshhost}:10010/${req.query.dest}`;
-      console.log(`UI calls server: ${url}`);
-      console.log(`Parameter for server call: ${JSON.stringify(config)}`);
+      log.info(`- Parameter for server call: ${JSON.stringify(config)}`);
       let r = await axios.get(url, config);
-      console.log(`Success full call, response: ${r.status}, ${r.data}`);
+      log.info(`- Success full call, response: ${r.status}`);
+      log.debug(`- Success full call, response data: ${JSON.stringify(r.data)}`);
       msg = {
         status : 200,
         text : "Success",
         target : url
       }
+    }else{
+      log.info(`- Local request only (no target server specified. Query: ${req.query.dest})`)
     }
   }catch(err){
-    console.error(JSON.stringify(err));
+    debugger
+    log.error(`- Server call failed: . ${err.toString()}`)
     let status = "";
     
     if(err && err.response && err.response.headers){
       status = err.response.headers.status;
-      console.log(JSON.stringify(err.response.headers))
+      log.error(`-- Response headers from failed call: ${JSON.stringify(err.response.headers)}`)
     }else{
-      console.log("No http header response")
+      log.error("-- No http header response")
     }
     msg = {
       status : status,
