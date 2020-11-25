@@ -13,6 +13,7 @@
 var util = require('util');
 const moment = require("moment");
 const axios = require('axios');
+var log = require('../helpers/log.js');
 
 
 /*
@@ -41,6 +42,7 @@ module.exports = {
 var pings = [];
 
 async function remoteping(req, res) {
+  log.info("Call remoteping")
   // variables defined in the Swagger document can be referenced using req.swagger.params.{parameter_name}
   let server = process.env.REMOTEPINGURL || "localhost";
   let perfix = process.env.REMOTEPINGPREFIX || "";
@@ -53,10 +55,8 @@ async function remoteping(req, res) {
         Authorization: req.headers.authorization
       }
     }
-    
-    console.log("--- Remoteping Call ---");
-    console.log(JSON.stringify(payload));
-
+    debugger
+    log.info(`- Parameters for remote request: ${JSON.stringify(payload)}`);
     let r = await axios(payload);
     let current = r.data[r.data.length-1];
     pings.push( {
@@ -64,11 +64,12 @@ async function remoteping(req, res) {
       message: `remoteping ${pings.length+1}`,
       remoteResponse : current
     } );
-    console.log(`Remote ${payload.url} successfully called`);
+    log.info(`- Remote call successfull. Status: ${r.status}`);
+    log.debug(`-- Response: ${r.data}`);
     // this sends back a JSON response which is a single string
     res.json(pings);
   }catch(err){
-    console.error(JSON.stringify(err));
+    log.error(err.toString());
     res.status(500).send('Remote service could not be called');
   }
 

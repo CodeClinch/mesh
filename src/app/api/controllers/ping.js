@@ -12,6 +12,7 @@
  */
 var util = require('util');
 const moment = require("moment");
+var log = require('../helpers/log.js');
 
 /*
  Once you 'require' a module you can reference the things that it exports.  These are defined in module.exports.
@@ -27,7 +28,7 @@ const moment = require("moment");
  */
 module.exports = {
   ping: ping, 
-  secureping : ping
+  secureping : secureping
 };
 
 /*
@@ -39,7 +40,17 @@ module.exports = {
 
 var pings = [];
 
+function secureping(req, res) {
+  log.info("Call secureping")
+  return pinghelper(req, res);
+}
+
 function ping(req, res) {
+  log.info("Call ping")
+  return pinghelper(req, res);
+}
+
+function pinghelper(req, res) {
   // variables defined in the Swagger document can be referenced using req.swagger.params.{parameter_name}
   pings.push( {
     time: moment().format("hh:mm:ss:ms"),
