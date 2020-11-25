@@ -1,5 +1,6 @@
 const axios = require('axios');
 const atob = require('atob');
+const log = require('./log.js');
 
 function parseJwt (token) {
   var base64Url = token.split('.')[1];
@@ -12,17 +13,17 @@ function parseJwt (token) {
 };
 
 async function authZ(req, authOrSecDef, scopesOrApiKey, callback) {
-  console.log("--- secure call ---");
   var current_req_scopes = req.swagger.operation["x-security-scopes"];
+  log.info(`AuthZ: required scopes: ${JSON.stringify(current_req_scopes)}`);
   let r = null;
   try{
     let jwt = {};
     if(req.headers && req.headers.authorization){
       jwt = parseJwt(req.headers.authorization);
-      console.log(`Secure headers: ${JSON.stringify(jwt)}`);
+      log.info(`- Secure headers: ${JSON.stringify(jwt)}`);
     }else{
       jwt.user_uuid = "";
-      console.log(`No authorization headers`);
+      log.info(`- No authorization headers`);
     }
     debugger
     let url = `http://localhost:8181/v1/data/cas/allow`;    
@@ -43,12 +44,12 @@ async function authZ(req, authOrSecDef, scopesOrApiKey, callback) {
       }
     };
 
-    console.log(`OPA call: ${JSON.stringify(opaParameters)}`);
+    log.info(`- OPA call: ${JSON.stringify(opaParameters)}`);
     r = await axios(opaParameters);
-    console.log(`OPA result: ${JSON.stringify(r.data)}`);
+    log.info(`- OPA result: ${JSON.stringify(r.data)}`);
     
   }catch(err){
-    console.error(JSON.stringify(err));
+    log.info(`- AuthZ error: ${err.toString()}`);
     err['statusCode'] = 401; // custom error code
     return callback(err);    
   }

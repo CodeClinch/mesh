@@ -6,6 +6,7 @@ const YAML = require('yamljs');
 const swaggerDocument = YAML.load('./api/swagger/swagger.yaml');
 const swaggerUI = require("swagger-ui-express");
 const auth = require('./api/helpers/auth.js');
+const log = require('./api/helpers/log.js');
 
 module.exports = app; // for testing
 
@@ -15,6 +16,13 @@ var config = {
     Bearer : auth.authZ
   }
 };
+
+// log headers
+app.use(function(req, res, next) {
+  log.info("----- New request ------");
+  log.info(`Request headers: ${JSON.stringify(req.headers)}`);
+  next();
+});
 
 app.use("/api/docs", swaggerUI.serve, swaggerUI.setup(swaggerDocument));
 
