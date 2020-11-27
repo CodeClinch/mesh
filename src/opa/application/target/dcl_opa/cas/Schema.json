@@ -1,0 +1,10 @@
+{
+  "Schema": {
+    "$dcl": {
+        "action": "String",
+        "resource": "String",
+        "user2policy": "String[]",
+        "policies": "String[]"
+    }
+  }
+}

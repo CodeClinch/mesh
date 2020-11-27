@@ -2,12 +2,16 @@
   "user2policy": {
     "zone-default": {
       "4b4804ef-9b3d-4772-bd47-8071c6f2a1b2": [
-        "Everyone",
-        "BusinessPartnerManager"
+        "cas.Everyone",
+        "cas.BusinessPartnerManager"
       ],
       "e57b4fef-65de-44e3-9679-bf04c9441d6e": [
-        "Everyone",
-        "Employee"
+        "cas.Everyone",
+        "cas.Employee"
+      ],
+      "eb6227fa-64a3-4f30-a9e9-6c0a750ee5b5": [
+        "cas.Everyone",
+        "cas.Employee"
       ]
     }
   }
