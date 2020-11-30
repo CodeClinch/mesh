@@ -1,0 +1,17 @@
+extends layout
+
+block content
+  h1.mb-3 Authorization
+  p Roles are added
+
+  div.mb-5
+    table.table
+      thead
+        tr
+          th UserID
+          th Roles
+      tbody
+        if jwt && jwt.mail
+          tr
+            td=userdata.ID
+            td=JSON.stringify(userdata.roles)

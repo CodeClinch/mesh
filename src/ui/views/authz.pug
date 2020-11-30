@@ -1,0 +1,31 @@
+extends layout
+
+block content
+  h1.mb-3 Authorization
+
+  h2 Token Information
+  div.mb-5
+    table.table
+      thead
+        tr
+          th Attribute
+          th Value
+      tbody
+        if jwt && jwt.mail
+          tr
+            td mail
+            td=jwt.mail
+          tr
+            td Firstname
+            td=jwt.first_name
+          tr
+            td id
+            td=jwt.user_uuid
+
+
+  h2 Add Roles
+  div
+    form(action="/authz" method="post")
+      label.mr-1(for="userid") UserID
+      input.mr-1(type="text" readonly id="userid" value=(jwt && jwt.jti ? jwt.jti : "" ))
+      input.mr-1(type="submit" value="Add Roles")
