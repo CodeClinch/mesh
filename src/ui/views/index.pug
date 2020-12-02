@@ -119,7 +119,7 @@ block content
     if message && query.action == "serverpol" && message.status != 200
       h5 Resolve User Authorization Issue
       div.mb-3.ml-3
-        form(action="/" method="post")
+        form(action="/?dest=secure/ping&demomeshhost=demomesh.server.global" method="post")
           label.mr-1(for="userid") UserID
           input.mr-1(type="text" readonly id="userid" value=(jwt && jwt.mail ? jwt.mail : "" ))
           input.mr-1(type="submit" value="Add roles")

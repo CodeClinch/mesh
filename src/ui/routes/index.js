@@ -5,6 +5,7 @@ const log = require("../log.js");
 const atob = require('atob');
 const libs = require("./libs.js")
 const parseJwt = libs.parseJwt;
+const opaurl = `http://demoopa.server.global:8181/v1/data/user2policy`;
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -14,6 +15,7 @@ router.get('/', function(req, res, next) {
 async function callBackend(req, res, next){
   let msg = null;
   let url = "";
+  let jwt = {};
   try{
     if(req.query.dest && req.query.demomeshhost){
       url = `http://${req.query.demomeshhost}:10010/${req.query.dest}`;
@@ -24,7 +26,7 @@ async function callBackend(req, res, next){
 
       if(req.headers.authorization){
         config.headers.Authorization = req.headers.authorization
-        let jwt = parseJwt(req.headers.authorization);
+        jwt = parseJwt(req.headers.authorization);
         log.info(`- With JWT forwarding: ${JSON.stringify(jwt)}`)
       }else{
         log.info("- Without JWT forwarding: no authentication headers provided")
@@ -44,7 +46,7 @@ async function callBackend(req, res, next){
   }catch(err){
     debugger
     log.error(`- Server call failed: . ${err.toString()}`)
-    let status = "";
+    let status = "403";
     
     if(err && err.response && err.response.headers){
       status = err.response.headers.status;
@@ -62,11 +64,13 @@ async function callBackend(req, res, next){
   res.render('index', { 
     title: 'Mesh Test', 
     message : msg, 
+    jwt : jwt,
     query : req.query });
 }
 
 router.post('/', async function(req, res, next) {
   let jwt = {};
+  let status = "200"
   let userdata = {
     id : "",
     roles : []
@@ -104,23 +108,24 @@ router.post('/', async function(req, res, next) {
       log.info(`Response from OPA put: ${JSON.stringify(r.data)}`)
     }catch(e){
       log.error(e.toString())
-    }
-
-    msg = {
-      status : status,
-      text : `Roles assigned to user ${jwt.mail}`,
-      target : url
+      status = "500";
     }
 
   }else{
+    status = "500";
     log.error("No JWT token found")
   }
 
-res.render('index', { 
-  title: 'Mesh Test', 
-  message : msg, 
-  query : req.query });
-  
+  msg = {
+    status : status,
+    text : `Roles assigned to user ${jwt.mail}`,
+    target : opaurl
+  }
+
+  res.render('index', { 
+    title: 'Mesh Test', 
+    message : msg, 
+    query : req.query });
 
 });
 
