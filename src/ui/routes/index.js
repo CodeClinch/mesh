@@ -65,4 +65,63 @@ async function callBackend(req, res, next){
     query : req.query });
 }
 
+router.post('/', async function(req, res, next) {
+  let jwt = {};
+  let userdata = {
+    id : "",
+    roles : []
+  }
+  if(req.headers && req.headers.authorization){
+    let config = {
+      headers: {}
+    }
+
+    config.headers.Authorization = req.headers.authorization
+    jwt = parseJwt(req.headers.authorization);
+    log.info(`- With JWT forwarding: ${JSON.stringify(jwt)}`)
+  
+    let r = {}
+    try{
+      r = await axios.get(opaurl, config);
+      log.info(`Response from OPA get: ${JSON.stringify(r.data)}`)
+    }catch(e){
+      log.error(e.toString())
+    }
+    
+    userdata.id = jwt.user_uuid;
+    userdata.roles = [
+      "cas.Everyone",
+      "cas.Employee",
+      "cas.Test"
+    ];
+    r.data.result["zone-default"][userdata.id] = userdata.roles;
+
+    try{
+      config.data = r.data.result;
+      config.url = opaurl;
+      config.method = 'put';
+      r = await axios(config);
+      log.info(`Response from OPA put: ${JSON.stringify(r.data)}`)
+    }catch(e){
+      log.error(e.toString())
+    }
+
+    msg = {
+      status : status,
+      text : `Roles assigned to user ${jwt.mail}`,
+      target : url
+    }
+
+  }else{
+    log.error("No JWT token found")
+  }
+
+res.render('index', { 
+  title: 'Mesh Test', 
+  message : msg, 
+  query : req.query });
+  
+
+});
+
 module.exports = router;

@@ -47,7 +47,7 @@ block content
         p.mb-1.mr-1="Text: " + message.text
   
     if message && query.action == "cert" && message.status != 200  
-      h5 Fix
+      h5 Resolve Service Authentication Issue
       div.mb-3.ml-3
         div
           code.mb-1.mr-1 kubectl --context=east label --overwrite namespace ui istio-injection=enabled
@@ -83,7 +83,7 @@ block content
         p.mb-1.mr-1="Text: " + message.text
 
     if message && query.action == "policy" && message.status != 200
-      h5 Fix
+      h5 Resolve Service Authorization Issue
       div.mb-3.ml-3
         div
           code.mb-1.mr-1 kubectl apply -f AuthZPolicyAllowUI.yaml -n server --context west
@@ -117,9 +117,12 @@ block content
         p.mb-1.mr-1="Status: " + message.status
         p.mb-1.mr-1="Text: " + message.text
     if message && query.action == "serverpol" && message.status != 200
-      h5 Fix
+      h5 Resolve User Authorization Issue
       div.mb-3.ml-3
-        code.mb-1.mr-1 Assign policy to user
+        form(action="/" method="post")
+          label.mr-1(for="userid") UserID
+          input.mr-1(type="text" readonly id="userid" value=(jwt && jwt.mail ? jwt.mail : "" ))
+          input.mr-1(type="submit" value="Add roles")
   
     h5 Szenario
     if message && message.status != 200
