@@ -1,0 +1,19 @@
+extends layout
+
+block content
+  h1 Services
+  if msg != "" && msg
+    p=msg
+
+  form#policy(action="/services" method="post")
+    h2 Source
+    select#source(name="source")
+      each val in srv
+        option(value=JSON.stringify(val))=val.name+" "+val.namespace
+    h2 Target
+    select#target(name="target")
+      each val in srv
+        option(value=JSON.stringify(val))=val.name+" "+val.namespace
+    p
+      input.mr-1(type="submit" value="Add policy")
+

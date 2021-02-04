@@ -7,6 +7,7 @@
     "debug": "node --inspect-brk ./bin/www"
   },
   "dependencies": {
+    "@kubernetes/client-node": "^0.13.2",
     "atob": "^2.1.2",
     "axios": "^0.20.0",
     "cookie-parser": "~1.4.4",

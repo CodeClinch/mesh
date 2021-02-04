@@ -6,8 +6,102 @@ const atob = require('atob');
 const libs = require("./libs.js")
 const parseJwt = libs.parseJwt;
 const opaurl = `http://demoopa.server.global:8181/v1/data/user2policy`;
+//const opaurl = `http://localhost:8181/v1/data/user2policy`;
 
 /* GET home page. */
+router.get('/services', function(req, res, next) {
+  getServices(req, res, next, "");
+});
+
+async function getServices(req, res, next, msg){
+  log.info(`Start getServices`)
+  try{
+    const k8s = require('@kubernetes/client-node');
+    log.info(`After include kube api`);
+
+    const kc = new k8s.KubeConfig();
+    log.info(`After get kube config`)
+    
+    kc.loadFromDefault();
+    log.info(`After loadFromDefault`)
+    
+    const k8sApi = kc.makeApiClient(k8s.CoreV1Api);
+    log.info(`After makeApiClient`)
+    
+    let r = {};
+    let ns = req.query && req.query.ns ? req.query.ns : false;
+    log.info(`Selected ns ${ns}`)
+
+    if(!ns){
+      r.pods = await (await k8sApi.listPodForAllNamespaces()).body.items;
+      log.info(`After listNamespacedPod`)
+      r.services = await (await k8sApi.listServiceForAllNamespaces()).body.items;
+      log.info(`After listNamespacedService`)
+    }else{
+      r.pods = await (await k8sApi.listNamespacedPod(ns)).body.items;
+      log.info(`After listNamespacedPod for ns ${ns}`)
+      r.services = await (await k8sApi.listNamespacedService(ns)).body.items;
+      log.info(`After listNamespacedService for ns ${ns}`)  
+    }
+
+    let srv = [];
+    let skip = ["kube-system", "istio-system"]
+    for(let i = 0; i < r.services.length; i++){
+      if(skip.indexOf(r.services[i].metadata.namespace) >= 0){
+        continue;
+      }
+      srv.push({
+        namespace : r.services[i].metadata.namespace,
+        name : r.services[i].metadata.name
+      })
+    }
+    res.render('services', { 
+      title: 'Service Policies', 
+      query : req.query, 
+      msg : msg,
+      srv : srv });
+    //res.send(srv);
+}catch(e){
+  log.error(`Error when calling Kubernetes API ${e.message}, Stringify ${JSON.stringify(e)}`)
+  res.render('error', { 
+    message : `Error when calling Kubernetes API`, 
+    error : e });
+  }
+}
+router.post('/services', function(req, res, next) {
+  savePolicy(req, res, next);
+});
+
+async function savePolicy(req, res, next){
+  let source = JSON.parse(req.body.source);
+  let target = JSON.parse(req.body.target);
+
+  let config = {
+    headers: {}
+  }
+  let r = {}
+  try{
+    r = await axios.get(opaurl, config);
+    log.info(`Response from OPA get: ${JSON.stringify(r.data)}`)
+  }catch(e){
+    log.error(e.toString())
+  }
+  
+  r.data.result["zone-default"][source.name] = target.name;
+
+  try{
+    config.data = r.data.result;
+    config.url = opaurl;
+    config.method = 'put';
+    r = await axios(config);
+    log.info(`Response from OPA put: ${JSON.stringify(r.data)}`)
+  }catch(e){
+    log.error(e.toString())
+    status = "500";
+  }
+  getServices(req, res, next, "Saved");
+}
+
 router.get('/', function(req, res, next) {
   callBackend(req, res, next);
 });

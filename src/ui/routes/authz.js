@@ -45,7 +45,6 @@ router.post('/', async function(req, res, next) {
     id : "",
     roles : []
   }
-  debugger
   if(req.headers && req.headers.authorization){
     let config = {
       headers: {}
