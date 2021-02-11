@@ -1,5 +1,5 @@
 schema {}
 
-POLICY "Employee" { GRANT "Employee"; }
-POLICY "Everyone" { GRANT "Everyone"; }
-POLICY "BusinessPartnerManager" { GRANT "BusinessPartnerManager"; }
+POLICY "Employee" { GRANT "Employee" ON *; }
+POLICY "Everyone" { GRANT "Everyone" ON *; }
+POLICY "BusinessPartnerManager" { GRANT "BusinessPartnerManager" ON *; }

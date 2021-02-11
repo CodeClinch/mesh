@@ -1,0 +1,19 @@
+version: '3.2'
+services:
+  opa:
+    image: codeclinch/opa:latest
+    labels: 
+      - app=opa
+    ports:
+      - 8181:8181
+#    volumes:
+#      - type: bind
+#        source: ./application/target/classes/cas
+#        target: /policies
+    command:
+      - "run"
+      - "--server"
+      - "--log-format=json-pretty"
+      - "--log-level=debug"
+      - "--set=decision_logs.console=true"
+      - "/policies"

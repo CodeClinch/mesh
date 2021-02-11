@@ -1,0 +1,23 @@
+applications:
+- name: neo2cf
+  path: application/target/firstapp-application.war
+  buildpacks:
+    - https://github.com/saescha/opa-builpack-PoC.git#tar_upload
+    - https://scmadmin:scmadmin@scm-c5295400.cfapps.sap.hana.ondemand.com/git/neo
+  routes:
+    - route: neo2cf-backend.cfapps.sap.hana.ondemand.com
+  services:
+    - IAS
+    - neo-ams
+  env:
+    TARGET_RUNTIME: tomee7
+    JBP_CONFIG_SAPJVM_MEMORY_SIZES: 'metaspace:96m..'
+    SET_LOGGING_LEVEL: '{com.sap.xs.security: DEBUG, com.sap.cloud.security: DEBUG, com.sap.cloud.sdk.cloudplatform.security: DEBUG, firstapp: INFO}'
+    JBP_CONFIG_OPEN_JDK_JRE: '[memory_calculator: {headroom: 10}]'
+    BUNDLE_PATH: /WEB-INF/classes
+    IAS_SERVICE_NAME: identity-beta
+    AMS_DATA:  >
+      {
+        "root": "/WEB-INF/classes/",
+        "directories": ["cas/"]
+      }

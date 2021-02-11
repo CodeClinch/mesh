@@ -11,6 +11,10 @@ block content
     a(href="/") 
       button.mr-2.btn.btn-outline-secondary.showbtn1.float-left
         i(class="fas fa-home")
+    a(href="/services") 
+      button.mr-2.btn.btn-outline-secondary.showbtn1.float-left
+        i(class="fas fa-cog")
+
 
   div#setup(class=(query.action == "setup" ? "" : "d-none"))
     h5 Mesh Setup
@@ -130,6 +134,3 @@ block content
     else
       img.mr-1(src="/images/Szenario-UI-Server-Opa.png")
   span#serverpol-dummy(class=(query.action == "serverpol" ? "" : "d-none"))
-
-  div.mt-3
-    p.font-weight-light.small Version: 0.1.5 - 3.2.2021

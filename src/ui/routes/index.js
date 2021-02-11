@@ -5,8 +5,6 @@ const log = require("../log.js");
 const atob = require('atob');
 const libs = require("./libs.js")
 const parseJwt = libs.parseJwt;
-const opaurl = `http://demoopa.server.global:8181/v1/data/user2policy`;
-//const opaurl = `http://localhost:8181/v1/data/user2policy`;
 
 /* GET home page. */
 router.get('/services', function(req, res, next) {
@@ -55,9 +53,27 @@ async function getServices(req, res, next, msg){
         name : r.services[i].metadata.name
       })
     }
+
+    //demoopa.client
+    const opaurl = `http://${(process.env.opalocal ? process.env.opalocal : "localhost")}:8181/v1/data/service2service`;  
+    log.info(`OPA url: ${opaurl}`)
+    let config = {
+      headers: {}
+    }
+    let mappings = []
+    try{
+      r = await axios.get(opaurl, config);
+      log.info(`Response from OPA get: ${JSON.stringify(r.data)}`)
+      mappings = r.data.result;
+    }catch(e){
+      log.error("Failer loading OPA data")
+    }
+  
+
     res.render('services', { 
       title: 'Service Policies', 
       query : req.query, 
+      mappings : mappings,
       msg : msg,
       srv : srv });
     //res.send(srv);
@@ -73,8 +89,13 @@ router.post('/services', function(req, res, next) {
 });
 
 async function savePolicy(req, res, next){
-  let source = JSON.parse(req.body.source);
-  let target = JSON.parse(req.body.target);
+  const opaurl = `http://${(process.env.opalocal ? process.env.opalocal : "localhost")}:8181/v1/data/service2service`;
+  log.info(`OPA url: ${opaurl} env: ${process.env.opalocal}`)
+
+  let source = req.body.source;
+  let target = req.body.target;
+  let zone = req.body.zone;
+  let action = req.body.action;
 
   let config = {
     headers: {}
@@ -83,22 +104,37 @@ async function savePolicy(req, res, next){
   try{
     r = await axios.get(opaurl, config);
     log.info(`Response from OPA get: ${JSON.stringify(r.data)}`)
-  }catch(e){
-    log.error(e.toString())
-  }
-  
-  r.data.result["zone-default"][source.name] = target.name;
 
-  try{
-    config.data = r.data.result;
-    config.url = opaurl;
-    config.method = 'put';
-    r = await axios(config);
-    log.info(`Response from OPA put: ${JSON.stringify(r.data)}`)
+    if(!r.data.result[zone] && zone){
+      r.data.result[zone] = {};
+    }
+    if(target && zone && !r.data.result[zone][target]){
+      r.data.result[zone][target] = [];
+    }
+    
+    if(action == "add"){
+      r.data.result[zone][target].push(source);
+    } else if(action == "del"){
+      let keys = Object.keys(r.data.result);
+      for(let i = 0; i < keys.length; i++){
+        r.data.result[keys[i]] = {};
+      }
+    }
+    
+    try{
+      config.data = r.data.result;
+      config.url = opaurl;
+      config.method = 'put';
+      r = await axios(config);
+      log.info(`Response from OPA put: ${JSON.stringify(r.data)}`)
+    }catch(e){
+      log.error("Failed to read from OPA" + e.toString())
+      status = "500";
+    }    
   }catch(e){
-    log.error(e.toString())
-    status = "500";
+    log.error("Failed to read from OPA" + e.toString())
   }
+
   getServices(req, res, next, "Saved");
 }
 
@@ -163,6 +199,9 @@ async function callBackend(req, res, next){
 }
 
 router.post('/', async function(req, res, next) {
+  const opaurl = `http://demoopa.server.global:8181/v1/data/principal2policies`;
+  //const opaurl = `http://localhost:8181/v1/data/principal2policies`;
+  
   let jwt = {};
   let status = "200"
   let userdata = {
@@ -192,7 +231,7 @@ router.post('/', async function(req, res, next) {
       "cas.Employee",
       "cas.Test"
     ];
-    r.data.result["zone-default"][userdata.id] = userdata.roles;
+    r.data.result[zone][userdata.id] = userdata.roles;
 
     try{
       config.data = r.data.result;

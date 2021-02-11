@@ -1,5 +1,5 @@
 {
-  "user2policy": {
+  "principal2policies": {
     "zone-default": {
       "4b4804ef-9b3d-4772-bd47-8071c6f2a1b2": [
         "cas.Everyone",
@@ -7,5 +7,12 @@
         "cas.BusinessPartnerManager"
       ]
     }
-  }
+  },
+  "service2service": {
+    "zone-default": {
+      "spiffe://east/ns/client/sa/default" : [
+        	"spiffe://east/ns/ui/sa/default"
+      ]
+    }
+  }  
 }

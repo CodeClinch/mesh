@@ -2,18 +2,49 @@ extends layout
 
 block content
   h1 Services
+  div.mb-3.clearfix
+    a(href="/") 
+      button.mr-2.btn.btn-outline-secondary.showbtn1.float-left
+        i(class="fas fa-home")  
+    a(href="/services") 
+      button.mr-2.btn.btn-outline-secondary.showbtn1.float-left
+        i(class="fas fa-cog")
+
   if msg != "" && msg
     p=msg
 
-  form#policy(action="/services" method="post")
-    h2 Source
-    select#source(name="source")
-      each val in srv
-        option(value=JSON.stringify(val))=val.name+" "+val.namespace
-    h2 Target
-    select#target(name="target")
-      each val in srv
-        option(value=JSON.stringify(val))=val.name+" "+val.namespace
-    p
-      input.mr-1(type="submit" value="Add policy")
+  h2 Add Subscription
+  div.ml-3.mb-5
+    form#policy(action="/services" method="post")
+      h3 Zone
+      select#source(name="zone")
+        option(value="zone-default")="zone-default"
 
+      h3 Source
+      select#source(name="source")
+        each val in srv
+          option(value=`spiffe://east/ns/${val.namespace}/sa/default`)=val.name+" "+val.namespace
+      h3 Target
+      select#target(name="target")
+        each val in srv
+          option(value=`spiffe://east/ns/${val.namespace}/sa/default`)=val.name+" "+val.namespace
+      p
+        input(type="hidden" value="add" id="action" name="action")
+        input.mr-1(type="submit" value="Add policy")
+
+  h2 Subscriptions & User Policy Assignments
+  div.ml-3.mb-5
+    each val, idx in mappings
+      h3="Zone: " + idx
+      table.table
+        tbody
+          tr
+            th.mr-2 Target
+            th.mr-2 Assignment
+          each val2, idx2 in mappings[idx]
+            tr 
+              td.mr-2=idx2
+              td.mr-2=val2
+    form#policy(action="/services" method="post")
+        input(type="hidden" value="del" id="action" name="action")
+        input.mr-1(type="submit" value="Delete all")
