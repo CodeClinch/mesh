@@ -19,6 +19,7 @@ block content
       h3 Zone
       select#source(name="zone")
         option(value="zone-default")="zone-default"
+        option(value=jwt.zone_uuid)=`Zone 1 - ${jwt.zone_uuid}`
 
       h3 Source
       select#source(name="source")

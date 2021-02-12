@@ -60,6 +60,13 @@ async function getServices(req, res, next, msg){
     let config = {
       headers: {}
     }
+
+    let jwt = {};
+    try{
+      jwt = parseJwt(req.headers.authorization);
+    }catch(e){
+      log.error(`JWT could not be loaded ${e.toString()}`)
+    }
     let mappings = []
     try{
       r = await axios.get(opaurl, config);
@@ -75,6 +82,7 @@ async function getServices(req, res, next, msg){
       query : req.query, 
       mappings : mappings,
       msg : msg,
+      jwt : jwt,
       srv : srv });
     //res.send(srv);
 }catch(e){
